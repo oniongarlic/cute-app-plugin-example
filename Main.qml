@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia
-import QtQml.XmlListModel
 import QtQuick.Dialogs
 
 ApplicationWindow {
@@ -25,6 +23,7 @@ ApplicationWindow {
     }
     
     footer: ToolBar {
+        id: toolbar
         RowLayout {
             
         }
