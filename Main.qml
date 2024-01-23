@@ -10,6 +10,10 @@ ApplicationWindow {
     height: 480
     visible: true
     title: qsTr("Plugin test application")
+
+    property var loadedPlugins: []
+
+    property var internalPlugins: ['dummy', 'nonexistant']
     
     menuBar: MenuBar {
         id: mainMenu
@@ -33,12 +37,22 @@ ApplicationWindow {
         id: stack
         anchors.fill: parent
     }
+
+    function loadExternalPlugin(dir) {
+        return loadFromDirectoryPlugin("file:/"+dir)
+    }
+
+    function loadInteralPlugin(name) {
+        console.debug("Loading internal plugin: "+name)
+        return loadFromDirectoryPlugin("plugins/"+name)
+    }
     
-    function loadPlugin(name) {
-        console.debug("Loading plugin: "+name)
-        let pdef="plugins/"+name+"/plugin.qml"
+    function loadFromDirectoryPlugin(name) {
+        console.debug("Loading plugin from: "+name)
+
         let p=pluginLoaderComponent.createObject(root, { });
-        p.source=pdef;
+
+        p.source=name+"/plugin.qml";
         if (p.status!=Loader.Ready) {
             console.debug("Failed to load plugin: "+name)
             return false
@@ -59,6 +73,8 @@ ApplicationWindow {
             console.debug("Creating plugin drawer")
             pi.getDrawer(root, c);
         }
+
+        loadedPlugins.push(p)
         
         return true;
     }
@@ -73,9 +89,18 @@ ApplicationWindow {
             }
         }
     }
+
+    function loadAllPlugins() {
+        console.debug("Loading internal plugins")
+        internalPlugins.forEach(pn=>loadInteralPlugin(pn))
+
+        console.debug("Loading external plugins")
+        console.debug(plugins)
+        plugins.forEach(pn=>loadExternalPlugin(pn))
+    }
     
     Component.onCompleted: {
-        loadPlugin("dummy")
+        loadAllPlugins();
     }
     
 }

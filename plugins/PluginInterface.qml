@@ -8,7 +8,7 @@ QtObject {
     property bool hasDrawer: false;
     
     // Common plugin components
-    property Menu menu;
+    property Menu menu;    
     property Drawer drawer;
     
     property list<PluginContent> components;
