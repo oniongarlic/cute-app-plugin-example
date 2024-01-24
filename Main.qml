@@ -12,6 +12,7 @@ ApplicationWindow {
     title: qsTr("Plugin test application")
 
     property var loadedPlugins: []
+    property var failedPlugins: []
 
     property var internalPlugins: ['dummy', 'nonexistant']
     
@@ -39,6 +40,7 @@ ApplicationWindow {
     }
 
     function loadExternalPlugin(dir) {
+        console.debug("Loading external plugin from: "+dir)
         return loadFromDirectoryPlugin("file:/"+dir)
     }
 
@@ -55,7 +57,8 @@ ApplicationWindow {
         p.source=name+"/plugin.qml";
         if (p.status!=Loader.Ready) {
             console.debug("Failed to load plugin: "+name)
-            return false
+            failedPlugins.push(name)
+            return true
         }
         
         let pi=p.item;
@@ -74,7 +77,7 @@ ApplicationWindow {
             pi.getDrawer(root, c);
         }
 
-        loadedPlugins.push(p)
+        loadedPlugins.push(pi)
         
         return true;
     }
@@ -88,7 +91,7 @@ ApplicationWindow {
                 
             }
         }
-    }
+    }    
 
     function loadAllPlugins() {
         console.debug("Loading internal plugins")
@@ -101,6 +104,9 @@ ApplicationWindow {
     
     Component.onCompleted: {
         loadAllPlugins();
+
+        console.debug(loadedPlugins)
+        console.debug(failedPlugins)
     }
     
 }
