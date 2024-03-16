@@ -13,7 +13,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("Plugin test application")
 
-    property var loadedPlugins: []
+    property list<PluginInterface> loadedPlugins: []
     property var failedPlugins: []
 
     property int loadedPluginCount: 0
@@ -85,7 +85,7 @@ ApplicationWindow {
         ItemDelegate {
             required property var modelData
             required property int index
-            text: modelData.objectName+" : "+loadedPlugins[index].pluginFriendlyName
+            text: modelData.pluginSerial +":"+ modelData.objectName+" : "+loadedPlugins[index].pluginFriendlyName
             width: ListView.view.width
             highlighted: ListView.isCurrentItem
             onClicked: {
@@ -111,11 +111,8 @@ ApplicationWindow {
         }
         
         let pi=p.item;
-
         let c=pi.createComponent(crl);
         c.visible=true
-        
-        loadedPlugins.push(c)
 
         if (pi.hasMenu) {
             console.debug("Creating plugin menu")
@@ -126,7 +123,7 @@ ApplicationWindow {
             console.debug("Creating plugin drawer")
             pi.getDrawer(root, c);
         }
-
+        
         loadedPlugins.push(pi)
         
         return true;
