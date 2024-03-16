@@ -8,6 +8,7 @@ PluginInterface {
     id: plugin
     
     objectName: "dummyPlugin"
+    pluginFriendlyName: "Dummy test plugin"
     
     hasMenu: true
     hasDrawer: true
@@ -22,8 +23,10 @@ PluginInterface {
                 onClicked: drawer.open()
             }
             MenuItem {
-                text: "Test 2"
-                onClicked: console.debug("Dummy test 2")
+                text: "Time"
+                checkable: true
+                checked: content.timeVisible
+                onClicked: content.timeVisible=checked;
             }
         }
     }

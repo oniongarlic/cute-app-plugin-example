@@ -6,10 +6,12 @@ import QtMultimedia
 import QtQml.XmlListModel
 import QtQuick.Dialogs
 
+import "plugins"
+
 ApplicationWindow {
     id: root
-    width: 640
-    height: 480
+    width: 1280
+    height: 720
     visible: true
     title: qsTr("Plugin test application")
     
@@ -20,6 +22,10 @@ ApplicationWindow {
             MenuItem {
                 text: "Quit"
                 onClicked: Qt.quit()
+            }
+            MenuItem {
+                text: "Add..."
+                onClicked: loadPlugin("dummy")
             }
         }
     }
@@ -33,23 +39,71 @@ ApplicationWindow {
     StackView {
         id: stack
         anchors.fill: parent
+        SplitView {
+            anchors.fill: parent
+            RowLayout {
+                id: crl
+                SplitView.fillWidth: true
+                spacing: 16
+            }
+            ColumnLayout {
+                SplitView.fillWidth: true
+                SplitView.minimumWidth: 200
+                Label {
+                    text: "Loaded plugins"
+                }
+
+                ListView {
+                    id: pluginsList
+                    model: loadedPlugins
+                    delegate: pluginDelegate
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                }
+            }
+        }
     }
+    
+    Component {
+        id: pluginDelegate
+        ItemDelegate {
+            required property var modelData
+            required property int index
+            text: modelData.objectName+" : "+loadedPlugins[index].pluginFriendlyName
+            width: ListView.view.width
+            highlighted: ListView.isCurrentItem
+            onClicked: {
+                ListView.currentIndex=index;
+            }
+            onDoubleClicked: {
+                ListView.currentIndex=index;
+                for (var i = 0; i < loadedPlugins.length; i++)
+                    console.log("plugin", i, loadedPlugins[i].pluginFriendlyName)
+            }
+        }
+    }
+    
+    property list<PluginInterface> loadedPlugins: [];
+    property int pluginCount: 1
+    
+    onLoadedPluginsChanged: console.debug(loadedPlugins)
     
     function loadPlugin(name) {
         console.debug("Loading plugin: "+name)
         let pdef="plugins/"+name+"/plugin.qml"
-        let p=pluginLoaderComponent.createObject(root, { });
-        p.source=pdef;
+        let p=pluginLoaderComponent.createObject(root);
+        p.setSource(pdef, { pluginSerial: pluginCount++ });
         if (p.status!=Loader.Ready) {
             console.debug("Failed to load plugin: "+name)
             return false
         }
         
         let pi=p.item;
-        
-        let c=pi.createComponent(stack);
-        
+
+        let c=pi.createComponent(crl);
         c.visible=true
+        
+        loadedPlugins.push(c)
 
         if (pi.hasMenu) {
             console.debug("Creating plugin menu")
@@ -76,6 +130,7 @@ ApplicationWindow {
     }
     
     Component.onCompleted: {
+        loadPlugin("dummy")
         loadPlugin("dummy")
     }
     

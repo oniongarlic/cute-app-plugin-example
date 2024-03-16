@@ -7,6 +7,11 @@ QtObject {
     property bool hasMenu: false
     property bool hasDrawer: false;
     
+    property int pluginSerial: 2138213123;
+    property string pluginFriendlyName: "Not set"
+    
+    onPluginSerialChanged: console.debug(pluginSerial)
+    
     // Common plugin components
     property Menu menu;
     property Drawer drawer;
