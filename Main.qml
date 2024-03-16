@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia
-import QtQml.XmlListModel
 import QtQuick.Dialogs
 
 import "plugins"
@@ -14,6 +12,13 @@ ApplicationWindow {
     height: 720
     visible: true
     title: qsTr("Plugin test application")
+
+    property var loadedPlugins: []
+    property var failedPlugins: []
+
+    property int loadedPluginCount: 0
+    
+    property var internalPlugins: ['dummy', 'nonexistant']
     
     menuBar: MenuBar {
         id: mainMenu
@@ -25,12 +30,13 @@ ApplicationWindow {
             }
             MenuItem {
                 text: "Add..."
-                onClicked: loadPlugin("dummy")
+                onClicked: loadInteralPlugin("dummy")
             }
         }
     }
     
     footer: ToolBar {
+        id: toolbar
         RowLayout {
             
         }
@@ -63,6 +69,16 @@ ApplicationWindow {
             }
         }
     }
+
+    function loadExternalPlugin(dir) {
+        console.debug("Loading external plugin from: "+dir)
+        return loadFromDirectoryPlugin("file:/"+dir)
+    }
+
+    function loadInteralPlugin(name) {
+        console.debug("Loading internal plugin: "+name)
+        return loadFromDirectoryPlugin("plugins/"+name)
+    }
     
     Component {
         id: pluginDelegate
@@ -83,19 +99,15 @@ ApplicationWindow {
         }
     }
     
-    property list<PluginInterface> loadedPlugins: [];
-    property int pluginCount: 1
-    
-    onLoadedPluginsChanged: console.debug(loadedPlugins)
-    
-    function loadPlugin(name) {
-        console.debug("Loading plugin: "+name)
-        let pdef="plugins/"+name+"/plugin.qml"
+    function loadFromDirectoryPlugin(name) {
+        console.debug("Loading plugin from: "+name)
         let p=pluginLoaderComponent.createObject(root);
-        p.setSource(pdef, { pluginSerial: pluginCount++ });
+        p.setSource(name+"/plugin.qml", { pluginSerial: loadedPluginCount++ });
+
         if (p.status!=Loader.Ready) {
             console.debug("Failed to load plugin: "+name)
-            return false
+            failedPlugins.push(name)
+            return true
         }
         
         let pi=p.item;
@@ -114,6 +126,8 @@ ApplicationWindow {
             console.debug("Creating plugin drawer")
             pi.getDrawer(root, c);
         }
+
+        loadedPlugins.push(pi)
         
         return true;
     }
@@ -127,11 +141,22 @@ ApplicationWindow {
                 
             }
         }
+    }    
+
+    function loadAllPlugins() {
+        console.debug("Loading internal plugins")
+        internalPlugins.forEach(pn=>loadInteralPlugin(pn))
+
+        console.debug("Loading external plugins")
+        console.debug(plugins)
+        plugins.forEach(pn=>loadExternalPlugin(pn))
     }
     
     Component.onCompleted: {
-        loadPlugin("dummy")
-        loadPlugin("dummy")
+        loadAllPlugins();
+
+        console.debug(loadedPlugins)
+        console.debug(failedPlugins)
     }
     
 }
