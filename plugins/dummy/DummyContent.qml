@@ -16,6 +16,7 @@ PluginContent {
     property bool timeVisible: true
     
     Layout.fillWidth: true
+    Layout.fillHeight: true
     
     Timer {
         id: tc
@@ -29,7 +30,7 @@ PluginContent {
     }
     
     ColumnLayout {
-        //anchors.fill: parent
+        id: c
         Text {
             id: t1
             text: "t1 mm.dd.yyyy"

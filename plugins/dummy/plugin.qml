@@ -10,6 +10,7 @@ PluginInterface {
     objectName: "dummyPlugin"
     pluginFriendlyName: "Dummy test plugin"
     
+    hasContent: true
     hasMenu: true
     hasDrawer: true
     

@@ -14,23 +14,24 @@ ApplicationWindow {
     title: qsTr("Plugin test application")
 
     property list<PluginInterface> loadedPlugins: []
-    property var failedPlugins: []
-
     property int loadedPluginCount: 0
-    
+
+    property list<PluginContent> pluginContents: []
+
+    property var failedPlugins: []  
     property var internalPlugins: ['dummy', 'nonexistant']
     
     menuBar: MenuBar {
         id: mainMenu
         Menu {
-            title: "File"
-            MenuItem {
-                text: "Quit"
-                onClicked: Qt.quit()
-            }
+            title: "File"            
             MenuItem {
                 text: "Add..."
                 onClicked: loadInteralPlugin("dummy")
+            }
+            MenuItem {
+                text: "Quit"
+                onClicked: Qt.quit()
             }
         }
     }
@@ -50,21 +51,56 @@ ApplicationWindow {
             RowLayout {
                 id: crl
                 SplitView.fillWidth: true
+                SplitView.minimumWidth: 400
                 spacing: 16
             }
             ColumnLayout {
                 SplitView.fillWidth: true
                 SplitView.minimumWidth: 200
+                SplitView.maximumWidth: 400
+                Label {
+                    text: "Available plugins"
+                }
+                ListView {
+                    id: pluginsList
+                    model: internalPlugins
+                    delegate: pluginDelegate
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                }
+
                 Label {
                     text: "Loaded plugins"
                 }
 
                 ListView {
-                    id: pluginsList
+                    id: loadedPluginsList
                     model: loadedPlugins
-                    delegate: pluginDelegate
+                    delegate: loadedPluginDelegate
                     Layout.fillHeight: true
                     Layout.fillWidth: true
+                }
+
+                Label {
+                    text: "Content items: "+pluginContents.length
+                }
+
+                ListView {
+                    id: contentItemsList
+                    model: pluginContents
+                    delegate: pluginContentDelegate
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                }
+                RowLayout {
+                    Button {
+                        text: "Unselect"
+                        onClicked: cdSelectedGroup.checkState=Qt.Unchecked
+                    }
+                    CheckBox {
+                        id: editContent
+                        text: "Edit"
+                    }
                 }
             }
         }
@@ -79,22 +115,88 @@ ApplicationWindow {
         console.debug("Loading internal plugin: "+name)
         return loadFromDirectoryPlugin("plugins/"+name)
     }
-    
+
+    ButtonGroup {
+        id: cdSelectedGroup
+    }
+
+    Component {
+        id: pluginContentDelegate
+        ItemDelegate {
+            id: _cd
+            required property var modelData
+            required property int index
+            width: ListView.view.width            
+            highlighted: ListView.isCurrentItem           
+            height: r.height
+            RowLayout {
+                id: r
+                width: parent.width
+                ColumnLayout {
+                    id: c
+                    spacing: 4
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: parent.width/4
+                    Layout.maximumWidth:  parent.width/1.25
+                    Text { text: modelData.objectName; }
+                }
+                RadioButton {
+                    text: "S"
+                    Layout.fillWidth: false
+                    ButtonGroup.group: cdSelectedGroup
+                    enabled: editContent.checked
+                    checked: modelData.isSelected && editContent.checked
+                    onCheckedChanged: {
+                        modelData.isSelected=checked
+                    }
+                }
+                CheckBox {
+                    text: "V"
+                    Layout.fillWidth: false
+                    checked: modelData.visible
+                    onCheckedChanged: {
+                        modelData.visible=checked
+                    }
+                }
+            }
+
+            onClicked: {
+                console.debug(index)
+                ListView.view.currentIndex=index;
+            }
+        }
+    }
+
     Component {
         id: pluginDelegate
+        ItemDelegate {
+            width: ListView.view.width
+            text: modelData
+            highlighted: ListView.isCurrentItem
+            onClicked: {
+                console.debug(index)
+                ListView.view.currentIndex=index;
+            }
+        }
+    }
+    
+    Component {
+        id: loadedPluginDelegate
         ItemDelegate {
             required property var modelData
             required property int index
             text: modelData.pluginSerial +":"+ modelData.objectName+" : "+loadedPlugins[index].pluginFriendlyName
             width: ListView.view.width
-            highlighted: ListView.isCurrentItem
+            highlighted: ListView.isCurrentItem            
             onClicked: {
-                ListView.currentIndex=index;
+                console.debug(index)
+                ListView.view.currentIndex=index;
             }
             onDoubleClicked: {
-                ListView.currentIndex=index;
+                console.debug(index)
+                ListView.view.currentIndex=index;
                 for (var i = 0; i < loadedPlugins.length; i++)
-                    console.log("plugin", i, loadedPlugins[i].pluginFriendlyName)
+                    console.log("plugin", i, loadedPlugins[i].pluginFriendlyName)                
             }
         }
     }
@@ -111,17 +213,26 @@ ApplicationWindow {
         }
         
         let pi=p.item;
-        let c=pi.createComponent(crl);
-        c.visible=true
+
+        let c=null
+        if (pi.hasContent) {
+            c=pi.getContent(crl);
+            c.visible=true
+            pluginContents.push(c)
+        }
 
         if (pi.hasMenu) {
-            console.debug("Creating plugin menu")
+            console.debug("Creating menu for plugin", name)
             mainMenu.addMenu(pi.getMenu(pi, c))
+        } else {
+            console.debug("Plugin has no menu");
         }
         
         if (pi.hasDrawer) {
-            console.debug("Creating plugin drawer")
+            console.debug("Creating drawer for plugin", name)
             pi.getDrawer(root, c);
+        } else {
+            console.debug("Plugin has no drawer");
         }
         
         loadedPlugins.push(pi)

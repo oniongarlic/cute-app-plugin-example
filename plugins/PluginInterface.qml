@@ -3,8 +3,12 @@ import QtQuick.Controls
 
 QtObject {
     id: plugin
-    
-    property bool hasMenu: false
+
+    // Does the plugin have visual content
+    property bool hasContent: false;
+    property bool singleInstantContent: true;
+
+    property bool hasMenu: false;
     property bool hasDrawer: false;
     
     property int pluginSerial: 2138213123;
@@ -16,9 +20,17 @@ QtObject {
     property Menu menu;    
     property Drawer drawer;
     
-    property list<PluginContent> components;
+    property list<PluginContent> contents;
     
     default property list<QtObject> children;
+
+    Component.onCompleted: {
+        console.debug("Completed: "+objectName)
+    }
+
+    Component.onDestruction: {
+        console.debug("Destryoing: "+objectName)
+    }
     
     function getMenu(mparent, c) {
         menu=pluginMenu.createObject(mparent, { content: c });
@@ -30,18 +42,9 @@ QtObject {
         return drawer
     }
     
-    Component.onCompleted: {
-        console.debug("Completed: "+objectName)
-    }
-    
-    Component.onDestruction: {
-        console.debug("Destryoing: "+objectName)
-    }
-    
-    function createComponent(vparent, i) {
+    function getContent(vparent, i) {
         let c=pluginContainer.createObject(vparent)
-        components.push(c)
+        contents.push(c)
         return c;
-    }
-    
+    }   
 }
