@@ -6,7 +6,7 @@ QtObject {
 
     // Does the plugin have visual content
     property bool hasContent: false;
-    property bool singleInstantContent: true;
+    property bool singleInstanceContent: true;
 
     property bool hasMenu: false;
     property bool hasDrawer: false;
@@ -17,7 +17,7 @@ QtObject {
     onPluginSerialChanged: console.debug(pluginSerial)
     
     // Common plugin components
-    property Menu menu;    
+    property Menu menu;
     property Drawer drawer;
     
     property list<PluginContent> contents;

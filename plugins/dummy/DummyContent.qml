@@ -33,15 +33,18 @@ PluginContent {
         id: c
         Text {
             id: t1
+            font.pixelSize: 32
             text: "t1 mm.dd.yyyy"
         }
         Text {
             id: t2
+            font.pixelSize: 32
             text: "t2 mm.dd.yyyy"
         }
         Text {
             id: t3
             visible: timeVisible
+            font.pixelSize: 32
             text: Qt.formatTime(date, "hh:mm:ss");
         }
     }
