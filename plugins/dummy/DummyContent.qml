@@ -1,4 +1,5 @@
-import QtQuick 
+import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 import ".."
@@ -17,11 +18,30 @@ PluginContent {
     
     Layout.fillWidth: true
     Layout.fillHeight: true
+
+    property bool boldTime: false
+
+    onBoldTimeChanged: console.debug(boldTime)
+
+    Menu {
+        id: cMenu
+        MenuItem {
+            id: boldTimeMenu
+            text: "Bold"
+            checkable: true
+            checked: boldTime
+            onCheckedChanged: boldTime=checked
+        }
+    }
+
+    Component.onCompleted: {
+        contextMenu=cMenu
+    }
     
     Timer {
         id: tc
         interval: 1000
-        running: parent.visible
+        running: parent.visible && parent.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {
@@ -41,10 +61,11 @@ PluginContent {
             font.pixelSize: 32
             text: "t2 mm.dd.yyyy"
         }
-        Text {
+        Label {
             id: t3
             visible: timeVisible
             font.pixelSize: 32
+            font.bold: boldTime
             text: Qt.formatTime(date, "hh:mm:ss");
         }
     }

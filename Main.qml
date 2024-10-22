@@ -56,8 +56,8 @@ ApplicationWindow {
             }
             ColumnLayout {
                 SplitView.fillWidth: true
-                SplitView.minimumWidth: 200
-                SplitView.maximumWidth: 400
+                SplitView.minimumWidth: 300
+                SplitView.maximumWidth: 500
                 Label {
                     text: "Available plugins"
                 }
@@ -140,6 +140,12 @@ ApplicationWindow {
                     Layout.maximumWidth:  parent.width/1.25
                     Text { text: modelData.objectName; }
                 }
+                Button {
+                    text: "P"
+                    onClicked: {
+                        modelData.contextMenu.popup();
+                    }
+                }
                 RadioButton {
                     text: "S"
                     Layout.fillWidth: false
@@ -148,6 +154,14 @@ ApplicationWindow {
                     checked: modelData.isSelected && editContent.checked
                     onCheckedChanged: {
                         modelData.isSelected=checked
+                    }
+                }
+                CheckBox {
+                    text: "E"
+                    Layout.fillWidth: false
+                    checked: modelData.enabled
+                    onCheckedChanged: {
+                        modelData.enabled=checked
                     }
                 }
                 CheckBox {
@@ -163,6 +177,11 @@ ApplicationWindow {
             onClicked: {
                 console.debug(index)
                 ListView.view.currentIndex=index;
+            }
+
+            onDoubleClicked: {
+                ListView.view.currentIndex=index;
+
             }
         }
     }
@@ -195,8 +214,12 @@ ApplicationWindow {
             onDoubleClicked: {
                 console.debug(index)
                 ListView.view.currentIndex=index;
+                modelData.drawer.open();
                 for (var i = 0; i < loadedPlugins.length; i++)
                     console.log("plugin", i, loadedPlugins[i].pluginFriendlyName)                
+            }
+            onPressAndHold: {
+                modelData.menu.open();
             }
         }
     }

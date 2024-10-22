@@ -1,9 +1,11 @@
 import QtQuick 
+import QtQuick.Controls
 
 Item {
     objectName: "Not set"
 
     property bool isSelected: false
+    property Menu contextMenu;
 
     onIsSelectedChanged: console.debug(isSelected)
 
